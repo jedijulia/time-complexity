@@ -1,4 +1,4 @@
-package up.cmsc142.julia.TimeComplexityFinal;
+package up.cmsc142.julia.TimeComplexity2Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,10 @@ public abstract class Component {
                 }
             } 
         }
+    }
+    
+    public String getTOfN() {
+        return "this empty thing";
     }
     
     public void print() {

@@ -1,4 +1,4 @@
-package up.cmsc142.julia.TimeComplexityFinal;
+package up.cmsc142.julia.TimeComplexity2Mod;
 
 //component that holds all the contents of the file
 public class BigComponent extends Component {
@@ -6,5 +6,9 @@ public class BigComponent extends Component {
     public BigComponent(String contents) {
         this.contents = contents;
         this.parse(this.contents);
+    }
+    
+    public String getTOfN() {
+        return this.children.get(0).getTOfN();
     }
 }

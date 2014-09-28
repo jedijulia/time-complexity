@@ -1,13 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package up.cmsc142.julia.TimeComplexityFinal;
+package up.cmsc142.julia.TimeComplexity2Mod;
 
-/**
- *
- * @author juliam
- */
 public class Variable {
     String variable;
     int exponent;
