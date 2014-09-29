@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package up.cmsc142.julia.TimeComplexityFinal;
 
+import up.cmsc142.julia.TimeComplexity2Mod3.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -41,12 +38,16 @@ public class Polynomial {
                 }
                 firstPol = (Polynomial)first;
                 secondPol = (Polynomial)second;
+                System.out.println("firstPol: " + firstPol);
+                System.out.println("secondPol: " + secondPol);
                 
                 if (operation.equals("+")) {   
                     result = firstPol.add(secondPol);
+                    System.out.println("result1: " + result + "\n");
                     stack.push(result);      
                 } else if (operation.equals("*")) {
                     result = firstPol.multiply(secondPol);
+                    System.out.println("result2: " + result + "\n");
                     stack.push(result);
                 }
             }

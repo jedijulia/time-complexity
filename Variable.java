@@ -1,5 +1,7 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
+import up.cmsc142.julia.TimeComplexity2Mod3.*;
+
 
 public class Variable {
     String variable;

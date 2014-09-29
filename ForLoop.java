@@ -1,5 +1,6 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
+import up.cmsc142.julia.TimeComplexity2Mod3.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -89,13 +90,21 @@ public class ForLoop extends Component {
             if (comparator.contains("<")) {
                 upper = conditionSplit[1].replace(';', ' ').trim();
                 lower = this.getInitBound(initialization, v);
+                if (!comparator.contains("=")) {
+                    lower = "" + (Integer.parseInt(lower) + 1);
+                }
             } else {
                 lower = conditionSplit[1].replace(';', ' ').trim();
                 upper = this.getInitBound(initialization, v);
+                if (!comparator.contains("=")) {
+                    lower = "" + (Integer.parseInt(lower) + 1);
+                }
             }
             this.var = v;
             this.lowerBound = lower;
             this.upperBound = upper;
+            System.out.println("upper: " + this.upperBound);
+            System.out.println("lower: " + this.lowerBound);
         }
         
         return counts;
@@ -140,9 +149,10 @@ public class ForLoop extends Component {
         // constant: constant * (upper bound - lower bound + 1)
         List<Object> toSum = new ArrayList<Object>();
         Term upperBoundTerm = new Term(this.upperBound);
-        Term lowerBoundTerm = new Term(this.lowerBound);
+        Term lowerBoundTerm = new Term("-" + this.lowerBound);
         Term oneTerm = new Term("1");
         
+        System.out.println("THIS IS CONSTANT: " + constant.term);
         toSum.add(constant);
         toSum.add(upperBoundTerm);
         toSum.add(lowerBoundTerm);
@@ -167,6 +177,12 @@ public class ForLoop extends Component {
         int conditionCount = counts.get(1);
         int incdecCount = counts.get(2);
         int childrenCount = this.getChildrenCount();
+        
+        System.out.println("init: " + initCount);
+        System.out.println("condition: " + conditionCount);
+        System.out.println("incdec: " + incdecCount);
+        System.out.println("children: " + childrenCount);
+        System.out.println("----------\n");
         
         if (childrenCount == 0) {
             return "" + (initCount + conditionCount);

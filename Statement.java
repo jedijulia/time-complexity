@@ -1,5 +1,7 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
+import up.cmsc142.julia.TimeComplexity2Mod3.*;
+
 
 public class Statement extends Component {
     
@@ -40,7 +42,7 @@ public class Statement extends Component {
     
  
     private boolean isOperator(char c) {
-        if ((c=='+') || (c=='-') || (c=='/') || (c=='*') || (c=='=') || (c=='%')) {
+        if ((c=='+') || (c=='-') || (c=='/') || (c=='*') || (c=='=') || (c=='%') || (c=='>') || (c=='<')) {
             return true;
         } else {
             return false;
