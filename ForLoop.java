@@ -1,4 +1,4 @@
-package up.cmsc142.julia.TimeComplexity2Mod;
+package up.cmsc142.julia.TimeComplexityFinal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,10 +87,10 @@ public class ForLoop extends Component {
             String v = conditionSplit[0].trim();
 
             if (comparator.contains("<")) {
-                upper = conditionSplit[1].trim();
+                upper = conditionSplit[1].replace(';', ' ').trim();
                 lower = this.getInitBound(initialization, v);
             } else {
-                lower = conditionSplit[1].trim();
+                lower = conditionSplit[1].replace(';', ' ').trim();
                 upper = this.getInitBound(initialization, v);
             }
             this.var = v;
@@ -136,9 +136,26 @@ public class ForLoop extends Component {
         return "";
     }
     
-//    public Polynomial getSummation() {
-//        // constant: constant * (upper bound - lower bound + 1)
-//    } 
+    public Polynomial getSummation(Term constant) {
+        // constant: constant * (upper bound - lower bound + 1)
+        List<Object> toSum = new ArrayList<Object>();
+        Term upperBoundTerm = new Term(this.upperBound);
+        Term lowerBoundTerm = new Term(this.lowerBound);
+        Term oneTerm = new Term("1");
+        
+        toSum.add(constant);
+        toSum.add(upperBoundTerm);
+        toSum.add(lowerBoundTerm);
+        toSum.add("+");
+        toSum.add(oneTerm);
+        toSum.add("+");
+        toSum.add("*");
+        
+        Polynomial summation = new Polynomial(toSum);
+        
+        summation = summation.compute();
+        return summation;
+    } 
     
     
     @Override
@@ -146,18 +163,32 @@ public class ForLoop extends Component {
         // summation of getChildrenCount + count of condiition + count of incdec
         // t of n = summation + count of init + count of condition
         List<Integer> counts = this.setBoundsGetCounts();
-        
         int initCount = counts.get(0);
         int conditionCount = counts.get(1);
         int incdecCount = counts.get(2);
+        int childrenCount = this.getChildrenCount();
         
-        if (incdecCount == 0) {
+        if (childrenCount == 0) {
             return "" + (initCount + conditionCount);
         } else {
-            return "to be solved suckas";
+            String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
+            Term constantTerm = new Term(constant);
+            Polynomial summation = this.getSummation(constantTerm);
+            Polynomial complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
+            return complexity.toString();
         }
     }
 
+    public int getChildrenCount() {
+        int count = 0;
+        for (Component child: this.children) {
+            if (child instanceof Statement) {
+                Statement childStatement = (Statement)child;
+                count += childStatement.getCount();
+            }
+        }
+        return count;
+    }
     
     @Override
     public void print() {

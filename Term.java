@@ -1,4 +1,4 @@
-package up.cmsc142.julia.TimeComplexity2Mod;
+package up.cmsc142.julia.TimeComplexityFinal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +58,17 @@ public class Term {
                 variables.add(currVar);
             }
         }
+        
+        Variable negative = this.getVariable(this, "-");
+        if (!negative.isEmpty()) {
+            String coefficientStrMod = "-" + negative.exponent;
+            this.coefficient = Integer.parseInt(coefficientStrMod);
+            this.variables.remove(negative);
+        }
     }
     
-    public Term add(Term anotherTerm) {
+    public Polynomial add(Term anotherTerm) {
+        List<Object> polynomialContents = new ArrayList();
         if (this.isValid(anotherTerm)) {
             // no variables
             String result = "";
@@ -74,10 +82,10 @@ public class Term {
                 result = coefficientSum + result;
             }
             Term resultTerm = new Term(result);
-            return resultTerm;
-        } else {
-            return this;
-        }
+            polynomialContents.add(resultTerm);
+        } 
+        Polynomial polynomial = new Polynomial(polynomialContents);
+        return polynomial;
     }
     
     public Term subtract(Term anotherTerm) {
@@ -105,7 +113,7 @@ public class Term {
 //            > add their powers! 
 //    - if there are more than one variables: DO NOT MULTIPLY, just concatenate them together 
     
-    public Term multiply(Term anotherTerm) {
+    public Polynomial multiply(Term anotherTerm) {
         String result = "" + (this.getCoefficient() * anotherTerm.getCoefficient());
         // make list of all variable.variables in both terms
         // loop through list and add powers if in both
@@ -127,7 +135,10 @@ public class Term {
             }
         }
         Term resultTerm = new Term(result);
-        return resultTerm;
+        List<Object> polynomialContents = new ArrayList();
+        polynomialContents.add(resultTerm);
+        Polynomial polynomial = new Polynomial(polynomialContents);
+        return polynomial;
     }
     
     public Variable getVariable(Term term, String var) {
@@ -176,9 +187,28 @@ public class Term {
         return this.variables;
     }
     
-    //TEMPORARY
+    
     public boolean isValid(Term anotherTerm) {
+        if (this.variables.size() != anotherTerm.variables.size()) {
+            return false;
+        }
+        for (Variable variable: this.variables) {
+            Variable otherVariable = this.getVariable(anotherTerm, variable.variable);
+            if (otherVariable.variable == null) {
+                return false;
+            }
+            if (variable.getExponent() != otherVariable.getExponent()) {
+                return false;
+            }
+        }
         return true;
+    }
+    
+    public Polynomial convertToPolynomial() {
+        List<Object> polyContents = new ArrayList();
+        polyContents.add(this);
+        Polynomial poly = new Polynomial(polyContents);
+        return poly;
     }
 }
 

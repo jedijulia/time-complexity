@@ -1,4 +1,4 @@
-package up.cmsc142.julia.TimeComplexity2Mod;
+package up.cmsc142.julia.TimeComplexityFinal;
 
 //component that holds all the contents of the file
 public class BigComponent extends Component {
