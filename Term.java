@@ -15,6 +15,10 @@ public class Term {
         this.constructTerm();
     }
     
+    public Term() {
+        
+    }
+    
     public void constructTerm() {
         String coefficientStr = "";
         boolean afterVar = false;
@@ -119,23 +123,34 @@ public class Term {
         // make list of all variable.variables in both terms
         // loop through list and add powers if in both
         // if not, just add
-        List<String> variableList = getVarList(anotherTerm);
-        if (variableList != null) {
-            for (int i=0; i < variableList.size(); i++) {
-                String currVar = variableList.get(i);
-                Variable termVar = getVariable(this, currVar);
-                Variable anotherTermVar = getVariable(anotherTerm, currVar);
-                if ((termVar.variable != null) && (anotherTermVar != null)) {
-                    int exponentSum = termVar.getExponent() + anotherTermVar.getExponent();
-                    result = result + currVar + exponentSum;
-                } else if (termVar.variable != null) {
-                    result = result + currVar + termVar.getExponent();
-                } else {
-                    result = result + currVar + anotherTermVar.getExponent();
+        Term resultTerm = new Term();
+        if (this instanceof Logarithm || anotherTerm instanceof Logarithm) {
+            if (this instanceof Logarithm) {
+                resultTerm = this;
+            } else {
+                resultTerm = anotherTerm;
+            }
+            resultTerm.coefficient = Integer.parseInt(result);
+            resultTerm.updateTermCoeff(term);
+        } else {
+            List<String> variableList = getVarList(anotherTerm);
+            if (variableList != null) {
+                for (int i=0; i < variableList.size(); i++) {
+                    String currVar = variableList.get(i);
+                    Variable termVar = getVariable(this, currVar);
+                    Variable anotherTermVar = getVariable(anotherTerm, currVar);
+                    if ((termVar.variable != null) && (anotherTermVar != null)) {
+                        int exponentSum = termVar.getExponent() + anotherTermVar.getExponent();
+                        result = result + currVar + exponentSum;
+                    } else if (termVar.variable != null) {
+                        result = result + currVar + termVar.getExponent();
+                    } else {
+                        result = result + currVar + anotherTermVar.getExponent();
+                    }
                 }
             }
+            resultTerm = new Term(result);
         }
-        Term resultTerm = new Term(result);
         resultTerm.denom = this.denom * anotherTerm.denom;
         List<Object> polynomialContents = new ArrayList();
         polynomialContents.add(resultTerm);
@@ -191,6 +206,10 @@ public class Term {
     
     
     public boolean isValid(Term anotherTerm) {
+        if (this instanceof Logarithm || anotherTerm instanceof Logarithm) {
+            return false;
+        }
+        
         if (this.variables.size() != anotherTerm.variables.size()) {
             return false;
         }
@@ -251,6 +270,19 @@ public class Term {
             toReturn = toReturn + "/" + denom;
         }
         return toReturn;
+    }
+    
+    //for Logarithm
+    public double compute() {
+        return 0;
+    }
+    
+    public boolean isComputable() {
+        return true;
+    }
+    
+    public boolean isInt(String s) {
+        return true;
     }
 }
 

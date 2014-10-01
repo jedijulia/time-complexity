@@ -99,12 +99,16 @@ public class ForLoop extends Component {
                 }
                 if (incdec.contains("-")) {
                     System.out.println("THIS IS AN INFINITE LOOP!");
-                } else {
+                } else if (incdec.contains("+")){
                     String incdecResult = this.findIncDec(incdec, "+");
                     if (!incdecResult.equals("+")) {
                         upper = upper + "/" + incdecResult;
                     }
-                }
+                } else if (incdec.contains("*")) {
+                    String incdecResult = this.findIncDec(incdec, "*");
+                    upper = "log" + incdecResult + " " + upper;
+                } 
+                // IS DIVIDE ALLOWED HERE????
             } else {
                 lower = conditionSplit[1].replace(';', ' ').trim();
                 upper = this.getInitBound(initialization, v); //fix this later
@@ -113,12 +117,16 @@ public class ForLoop extends Component {
                 }
                 if (incdec.contains("+")) {
                     System.out.println("THIS IS AN INFINITE LOOP!");
-                } else {
+                } else if (incdec.contains("-")){
                     String incdecResult = this.findIncDec(incdec, "-");
                     if (!incdecResult.equals("-")) {
                         upper = upper + "/" + incdecResult;
                     }
-                }
+                } else if (incdec.contains("/")) {
+                    String incdecResult = this.findIncDec(incdec, "/");
+                    upper = "log" + incdecResult + " " + upper;
+                } 
+                // IS MULTIPLY ALLOWED HERE????
             }
             this.var = v;
             this.lowerBound = lower;
@@ -170,8 +178,18 @@ public class ForLoop extends Component {
     public Polynomial getSummation(Term constant) {
         // constant: constant * (upper bound - lower bound + 1)
         List<Object> toSum = new ArrayList<Object>();
-        Polynomial upperBoundPoly = new Polynomial("");
-        if (this.upperBound.contains("/")) {
+        Polynomial upperBoundPoly;
+        
+        //upper = "log" + incdecResult + " " + upper;
+        if (this.upperBound.contains("log")) {
+            String split[] = this.upperBound.split("log");
+            String base = split[1].split(" ")[0];
+            String arg = split[1].split(" ")[1];
+            Term log = new Logarithm(base, arg);
+            upperBoundPoly = log.convertToPolynomial();
+        }
+        
+        else if (this.upperBound.contains("/")) {
             String denom = getDenomSetUpper();
             upperBoundPoly = new Polynomial(this.upperBound);
             this.setDenoms(upperBoundPoly, denom);
@@ -179,8 +197,10 @@ public class ForLoop extends Component {
         else {
             upperBoundPoly = new Polynomial(this.upperBound);
         }
+        
         System.out.println("THIS IS YOUR POLYNOMIAL!");
         System.out.println(upperBoundPoly + "\n");
+        
         Polynomial lowerBoundPoly = new Polynomial("-" + this.lowerBound);
         Term oneTerm = new Term("1");
         
