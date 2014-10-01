@@ -158,21 +158,26 @@ public class ForLoop extends Component {
         boolean varFound = false;
         boolean afterEquals = false;
         initialization = initialization.trim();
-        if (!initialization.equals(";")) {
-            for (int i=0; i < initialization.length(); i++) {
-                char currChar = initialization.charAt(i);
-                if (afterEquals && currChar != ' ') {
-                    return "" + currChar;
-                }
-                if (varFound && currChar == '=') {
-                    afterEquals = true;
-                }
-                if (currChar == var.charAt(0)) {
-                    varFound = true;
-                }
+        String initBound = "";
+                
+        char currChar = initialization.charAt(0);
+        int i = 0;
+        while ((initialization.charAt(i) != ',') && (initialization.charAt(i) != ';')) {
+            System.out.println("this was i: " + i);
+            currChar = initialization.charAt(i);
+            System.out.println("this was currChar: " + currChar);
+            if (afterEquals) {
+                initBound += currChar;
             }
+            if (varFound && currChar == '=') {
+                afterEquals = true;
+            }
+            if (currChar == var.charAt(0)) {
+                varFound = true;
+            }
+            i++;
         }
-        return "";
+        return initBound.trim();
     }
     
     public Polynomial getSummation(Term constant) {
