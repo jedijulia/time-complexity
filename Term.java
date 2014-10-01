@@ -1,6 +1,5 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
-import up.cmsc142.julia.TimeComplexity2Mod3.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +7,7 @@ import java.util.List;
 public class Term {
     String term;
     int coefficient = 1;
+    int denom = 1;
     List<Variable> variables = new ArrayList();
     
     public Term(String term) {
@@ -136,6 +136,7 @@ public class Term {
             }
         }
         Term resultTerm = new Term(result);
+        resultTerm.denom = this.denom * anotherTerm.denom;
         List<Object> polynomialContents = new ArrayList();
         polynomialContents.add(resultTerm);
         Polynomial polynomial = new Polynomial(polynomialContents);
@@ -210,6 +211,46 @@ public class Term {
         polyContents.add(this);
         Polynomial poly = new Polynomial(polyContents);
         return poly;
+    }
+    
+    public void setDenom(int denom) {
+        this.denom = denom;
+    }
+    
+    public void updateCoefficient() {
+        if (this.denom != 1) {
+            if ((this.coefficient % this.denom) == 0) {
+                this.coefficient /= this.denom;
+                this.updateTermCoeff("" + this.coefficient);
+                this.denom = 1;
+            }
+        }
+    }
+    
+    public void updateTermCoeff(String coeff) {
+        boolean found = false;
+        int i=0;
+        int index=0;
+        while (!found) {
+            char currChar = this.term.charAt(i);
+            if(!Character.isDigit(currChar)) {
+                found = true;
+                index = i;
+            }
+            i++;
+        }
+        String updatedCoeff = coeff + this.term.substring(index, this.term.length());
+        this.term = updatedCoeff;
+    }
+    
+    @Override
+    public String toString() {
+        String toReturn = "";
+        toReturn = this.term;
+        if (this.denom != 1) {
+            toReturn = toReturn + "/" + denom;
+        }
+        return toReturn;
     }
 }
 

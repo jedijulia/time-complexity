@@ -1,6 +1,5 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
-import up.cmsc142.julia.TimeComplexity2Mod3.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -13,12 +12,47 @@ public class Polynomial {
     public Polynomial(List<Object> contents) {
         this.contents = contents;
     }
+    
+    public Polynomial(String string) {
+        String termStr = "";
+        boolean afterNegative = false;
+        for (int i=0; i < string.length(); i++) {
+            char currChar = string.charAt(i); 
+            if (currChar == '+') {
+                Term term = new Term(termStr);
+                this.contents.add(term);
+                this.contents.add("+");
+                termStr = "";
+            } else if (currChar == '-') {
+                if (i!=0) {
+                    Term term = new Term(termStr);
+                    this.contents.add(term);
+                    this.contents.add("+");
+                    termStr = "";
+                }
+                afterNegative = true;
+            } else { 
+                if (afterNegative) {
+                    termStr = termStr + "-" + currChar;
+                    afterNegative = false;
+                } else {
+                    termStr += currChar;
+                }
+            }
+        }
+        if (!termStr.equals("")) {
+            Term term = new Term(termStr);
+            this.contents.add(term);
+        }
+    }
         
     public Polynomial compute() {
         Stack stack = new Stack();
         for (int i=0; i < this.contents.size(); i++) {
             Object currItem = this.contents.get(i);
             if (currItem instanceof Term) {
+                stack.push(currItem);
+            } else if (currItem instanceof Polynomial) {
                 stack.push(currItem);
             } else {
                 String operation = (String)currItem;
@@ -44,10 +78,12 @@ public class Polynomial {
                 if (operation.equals("+")) {   
                     result = firstPol.add(secondPol);
                     System.out.println("result1: " + result + "\n");
+                    result = result.updateCoefficients();
                     stack.push(result);      
                 } else if (operation.equals("*")) {
                     result = firstPol.multiply(secondPol);
                     System.out.println("result2: " + result + "\n");
+                    result = result.updateCoefficients();
                     stack.push(result);
                 }
             }
@@ -148,6 +184,21 @@ public class Polynomial {
         }
     }
     
+    public Polynomial updateCoefficients() {
+        List<Object> updated = new ArrayList();
+        for (Object object: this.contents) {
+            if (object instanceof Term) {
+                Term currTerm = (Term)object;
+                currTerm.updateCoefficient();
+                updated.add(currTerm);
+            } else {
+                updated.add(object);
+            }
+        }
+        Polynomial updatedPoly = new Polynomial(updated);
+        return updatedPoly;
+    }
+    
     @Override
     public String toString() {
         String toReturn = "";
@@ -157,7 +208,7 @@ public class Polynomial {
                 toReturn = toReturn + currItem + " ";
             } else {
                 Term currTerm = (Term)currItem;
-                toReturn = toReturn + currTerm.term + " ";
+                toReturn = toReturn + currTerm + " ";
             }
         }
         return toReturn;

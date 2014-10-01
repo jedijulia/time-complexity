@@ -1,6 +1,5 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
-import up.cmsc142.julia.TimeComplexity2Mod3.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +19,17 @@ public class Tester {
         BigComponent component = new BigComponent(toParse);
         //component.print();
         System.out.println(component.getTOfN());    
-       
+        
+        //Polynomial test = new Polynomial("3n-1+6-2x");
+        //System.out.println(test);
+//        String meh = "i+=3";
+//        int firstIndex = meh.indexOf("+");
+//        String sub = meh.substring(firstIndex+1, meh.length());
+//        if (sub.contains("=")) {
+//            sub = sub.replace("=", "");
+//            sub = sub.trim();
+//        }
+//        System.out.println("sub! " + sub);
         
 //        List<Object> polyContents = new ArrayList();
 ////        Term one = new Term("3n2");

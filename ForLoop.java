@@ -1,6 +1,6 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
-import up.cmsc142.julia.TimeComplexity2Mod3.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -65,6 +65,7 @@ public class ForLoop extends Component {
         String initialization = this.forParts.get(0);
         String condition = this.forParts.get(1);
         String incdec = this.forParts.get(2);
+        System.out.println("your incdec: " + incdec);
         
         Statement initStatement = new Statement(initialization);
         Statement conditionStatement = new Statement(condition);
@@ -73,6 +74,8 @@ public class ForLoop extends Component {
         counts.add(initStatement.getCount());
         counts.add(conditionStatement.getCount());
         counts.add(incdecStatement.getCount());
+        
+        //RETRIEVE CRUCIAL PARTS OF EACH IN CASE OF MULTIPLE STATEMENTS
         
         // sets bounds only if incdec statement exists
         if (counts.get(2) != 0) {
@@ -85,19 +88,36 @@ public class ForLoop extends Component {
             String comparator = this.getComparator(condition);
 
             String conditionSplit[] = condition.split(comparator);
-            String v = conditionSplit[0].trim();
-
+            String conditionLeft = conditionSplit[0].trim();
+            String v = this.findV(conditionLeft);
+            
             if (comparator.contains("<")) {
-                upper = conditionSplit[1].replace(';', ' ').trim();
+                upper = conditionSplit[1].replace(';', ' ').trim() + getVExtra(conditionLeft, v);
                 lower = this.getInitBound(initialization, v);
                 if (!comparator.contains("=")) {
-                    lower = "" + (Integer.parseInt(lower) + 1);
+                    upper += "-1";
+                }
+                if (incdec.contains("-")) {
+                    System.out.println("THIS IS AN INFINITE LOOP!");
+                } else {
+                    String incdecResult = this.findIncDec(incdec, "+");
+                    if (!incdecResult.equals("+")) {
+                        upper = upper + "/" + incdecResult;
+                    }
                 }
             } else {
                 lower = conditionSplit[1].replace(';', ' ').trim();
-                upper = this.getInitBound(initialization, v);
+                upper = this.getInitBound(initialization, v); //fix this later
                 if (!comparator.contains("=")) {
-                    lower = "" + (Integer.parseInt(lower) + 1);
+                    upper += "-1";
+                }
+                if (incdec.contains("+")) {
+                    System.out.println("THIS IS AN INFINITE LOOP!");
+                } else {
+                    String incdecResult = this.findIncDec(incdec, "-");
+                    if (!incdecResult.equals("-")) {
+                        upper = upper + "/" + incdecResult;
+                    }
                 }
             }
             this.var = v;
@@ -119,6 +139,8 @@ public class ForLoop extends Component {
             return ">";
         } else if (condition.contains("<")) {
             return "<";
+        } else if (condition.contains("!=")) {
+            return "!=";
         } else {
             return "";
         }
@@ -148,14 +170,29 @@ public class ForLoop extends Component {
     public Polynomial getSummation(Term constant) {
         // constant: constant * (upper bound - lower bound + 1)
         List<Object> toSum = new ArrayList<Object>();
-        Term upperBoundTerm = new Term(this.upperBound);
-        Term lowerBoundTerm = new Term("-" + this.lowerBound);
+        Polynomial upperBoundPoly = new Polynomial("");
+        if (this.upperBound.contains("/")) {
+            String denom = getDenomSetUpper();
+            upperBoundPoly = new Polynomial(this.upperBound);
+            this.setDenoms(upperBoundPoly, denom);
+        }
+        else {
+            upperBoundPoly = new Polynomial(this.upperBound);
+        }
+        System.out.println("THIS IS YOUR POLYNOMIAL!");
+        System.out.println(upperBoundPoly + "\n");
+        Polynomial lowerBoundPoly = new Polynomial("-" + this.lowerBound);
         Term oneTerm = new Term("1");
         
-        System.out.println("THIS IS CONSTANT: " + constant.term);
         toSum.add(constant);
-        toSum.add(upperBoundTerm);
-        toSum.add(lowerBoundTerm);
+        toSum.add(upperBoundPoly);
+//        for (Object upperBoundObj: upperBoundPoly.contents) {
+//            toSum.add(upperBoundObj);
+//        }
+        toSum.add(lowerBoundPoly);
+//        for (Object lowerBoundObj: lowerBoundPoly.contents) {
+//            toSum.add(lowerBoundObj);
+//        }
         toSum.add("+");
         toSum.add(oneTerm);
         toSum.add("+");
@@ -189,6 +226,7 @@ public class ForLoop extends Component {
         } else {
             String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
             Term constantTerm = new Term(constant);
+            System.out.println("THIS IS YOUR CONSTANT: " + constantTerm);
             Polynomial summation = this.getSummation(constantTerm);
             Polynomial complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
             return complexity.toString();
@@ -204,6 +242,70 @@ public class ForLoop extends Component {
             }
         }
         return count;
+    }
+    
+    public String getVExtra(String s, String v) {
+        String[] split = s.split(v);
+        if (split.length == 0) {
+            return "";
+        }
+        String extra = "";
+        for (int i=0; i < split.length; i++) {
+            if (!split[i].contains(v)) {
+                extra += split[i];
+            }
+        }
+        
+        String extraRev = "";
+        for (int j=0; j < extra.length(); j++) {
+            char currChar = extra.charAt(j);
+            if (currChar == '+') {
+                extraRev += '-';
+            } else if (currChar == '-') {
+                extraRev += '+';
+            } else {
+                extraRev += currChar;
+            }
+        }
+        return extraRev;
+    }
+    
+    public String findV(String s) {
+        for (int i=0; i < s.length(); i++) {
+            char currChar = s.charAt(i);
+            if (Character.isLetter(currChar)) {
+                return "" + currChar;
+            }
+        }
+        return "";
+    }
+    
+    public String findIncDec(String incdec, String op) {
+        int index = incdec.indexOf(op);
+        String sub = incdec.substring(index+1, incdec.length());
+        if (sub.contains("=")) {
+            sub = sub.replace("=", "");
+            sub = sub.trim();
+        }
+        return sub;
+    }
+    
+    public String getDenomSetUpper() {
+        String[] split = this.upperBound.split("/");
+        String denom = split[1];
+        denom = denom.trim();
+        this.upperBound = split[0].trim();
+        return denom;
+    }
+    
+    public void setDenoms(Polynomial poly, String denom) {
+        for (Object object: poly.contents) {
+            if (object instanceof Term) {
+                Term currTerm = (Term)object;
+                currTerm.setDenom(Integer.parseInt(denom));
+                currTerm.updateCoefficient();
+            }
+        }
     }
     
     @Override
