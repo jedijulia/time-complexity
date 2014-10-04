@@ -17,7 +17,6 @@ public class Tester {
         }
         
         BigComponent component = new BigComponent(toParse);
-        //component.print();
         System.out.println(component.getTOfN());  
         
     }
