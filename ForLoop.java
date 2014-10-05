@@ -75,7 +75,6 @@ public class ForLoop extends Component {
         counts.add(conditionStatement.getCount());
         counts.add(incdecStatement.getCount());
         
-        //RETRIEVE CRUCIAL PARTS OF EACH IN CASE OF MULTIPLE STATEMENTS
         
         // sets bounds only if incdec statement exists
         if (counts.get(2) != 0) {
@@ -108,7 +107,6 @@ public class ForLoop extends Component {
                     String incdecResult = this.findIncDec(incdec, "*");
                     upper = "log" + incdecResult + " " + upper;
                 } 
-                // IS DIVIDE ALLOWED HERE????
             } else {
                 lower = conditionSplit[1].replace(';', ' ').trim();
                 upper = this.getInitBound(initialization, v); //fix this later
@@ -126,7 +124,6 @@ public class ForLoop extends Component {
                     String incdecResult = this.findIncDec(incdec, "/");
                     upper = "log" + incdecResult + " " + upper;
                 } 
-                // IS MULTIPLY ALLOWED HERE????
             }
             this.var = v;
             this.lowerBound = lower;
@@ -211,13 +208,7 @@ public class ForLoop extends Component {
         
         toSum.add(constant);
         toSum.add(upperBoundPoly);
-//        for (Object upperBoundObj: upperBoundPoly.contents) {
-//            toSum.add(upperBoundObj);
-//        }
         toSum.add(lowerBoundPoly);
-//        for (Object lowerBoundObj: lowerBoundPoly.contents) {
-//            toSum.add(lowerBoundObj);
-//        }
         toSum.add("+");
         toSum.add(oneTerm);
         toSum.add("+");
