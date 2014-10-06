@@ -76,7 +76,7 @@ public class ForLoop extends Component {
         counts.add(initStatement.getCount());
         counts.add(conditionStatement.getCount());
         counts.add(incdecStatement.getCount());
-
+        
         // sets bounds only if incdec statement exists
         if (counts.get(2) != 0) {
             // check condition if less than or greater than 
