@@ -60,12 +60,14 @@ public class ForLoop extends Component {
         return toParse;
     }
     
+    /* sets upper bound and lower bound of the for loop
+     * return list containing counts of the initialization, condition, iteration statements
+     */
     public List<Integer> setBoundsGetCounts() {
         List<Integer> counts = new ArrayList();
         String initialization = this.forParts.get(0);
         String condition = this.forParts.get(1);
         String incdec = this.forParts.get(2);
-        System.out.println("your incdec: " + incdec);
         
         Statement initStatement = new Statement(initialization);
         Statement conditionStatement = new Statement(condition);
@@ -74,15 +76,12 @@ public class ForLoop extends Component {
         counts.add(initStatement.getCount());
         counts.add(conditionStatement.getCount());
         counts.add(incdecStatement.getCount());
-        
-        //RETRIEVE CRUCIAL PARTS OF EACH IN CASE OF MULTIPLE STATEMENTS
-        
+
         // sets bounds only if incdec statement exists
         if (counts.get(2) != 0) {
             // check condition if less than or greater than 
             // if less than: initialization is lower, condition is upper
             // if not: condition is lower, initialization is upper
-
             String lower;
             String upper;
             String comparator = this.getComparator(condition);
@@ -108,10 +107,9 @@ public class ForLoop extends Component {
                     String incdecResult = this.findIncDec(incdec, "*");
                     upper = "log" + incdecResult + " " + upper;
                 } 
-                // IS DIVIDE ALLOWED HERE????
             } else {
                 lower = conditionSplit[1].replace(';', ' ').trim();
-                upper = this.getInitBound(initialization, v); //fix this later
+                upper = this.getInitBound(initialization, v); 
                 if (!comparator.contains("=")) {
                     upper += "-1";
                 }
@@ -126,13 +124,10 @@ public class ForLoop extends Component {
                     String incdecResult = this.findIncDec(incdec, "/");
                     upper = "log" + incdecResult + " " + upper;
                 } 
-                // IS MULTIPLY ALLOWED HERE????
             }
             this.var = v;
             this.lowerBound = lower;
             this.upperBound = upper;
-            System.out.println("upper: " + this.upperBound);
-            System.out.println("lower: " + this.lowerBound);
         }
         
         return counts;
@@ -154,6 +149,7 @@ public class ForLoop extends Component {
         }
     }
     
+    //retrieves bound from the initialization statement
     private String getInitBound(String initialization, String var) {
         boolean varFound = false;
         boolean afterEquals = false;
@@ -163,9 +159,7 @@ public class ForLoop extends Component {
         char currChar = initialization.charAt(0);
         int i = 0;
         while ((initialization.charAt(i) != ',') && (initialization.charAt(i) != ';')) {
-            System.out.println("this was i: " + i);
             currChar = initialization.charAt(i);
-            System.out.println("this was currChar: " + currChar);
             if (afterEquals) {
                 initBound += currChar;
             }
@@ -179,6 +173,7 @@ public class ForLoop extends Component {
         }
         return initBound.trim();
     }
+
     
     public Polynomial getSummation(Term constant) {
         // constant: constant * (upper bound - lower bound + 1)
@@ -203,21 +198,13 @@ public class ForLoop extends Component {
             upperBoundPoly = new Polynomial(this.upperBound);
         }
         
-        System.out.println("THIS IS YOUR POLYNOMIAL!");
-        System.out.println(upperBoundPoly + "\n");
-        
         Polynomial lowerBoundPoly = new Polynomial("-" + this.lowerBound);
         Term oneTerm = new Term("1");
         
+        //adds objects to toSum in postfix notation
         toSum.add(constant);
         toSum.add(upperBoundPoly);
-//        for (Object upperBoundObj: upperBoundPoly.contents) {
-//            toSum.add(upperBoundObj);
-//        }
         toSum.add(lowerBoundPoly);
-//        for (Object lowerBoundObj: lowerBoundPoly.contents) {
-//            toSum.add(lowerBoundObj);
-//        }
         toSum.add("+");
         toSum.add(oneTerm);
         toSum.add("+");
@@ -240,18 +227,11 @@ public class ForLoop extends Component {
         int incdecCount = counts.get(2);
         int childrenCount = this.getChildrenCount();
         
-        System.out.println("init: " + initCount);
-        System.out.println("condition: " + conditionCount);
-        System.out.println("incdec: " + incdecCount);
-        System.out.println("children: " + childrenCount);
-        System.out.println("----------\n");
-        
         if (childrenCount == 0) {
             return "" + (initCount + conditionCount);
         } else {
             String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
             Term constantTerm = new Term(constant);
-            System.out.println("THIS IS YOUR CONSTANT: " + constantTerm);
             Polynomial summation = this.getSummation(constantTerm);
             Polynomial complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
             return complexity.toString();
@@ -315,6 +295,7 @@ public class ForLoop extends Component {
         return sub;
     }
     
+    // returns the denominator, sets the upperbound 
     public String getDenomSetUpper() {
         String[] split = this.upperBound.split("/");
         String denom = split[1];
@@ -323,6 +304,7 @@ public class ForLoop extends Component {
         return denom;
     }
     
+    //sets the denominator of each of the terms inside the Polynomial
     public void setDenoms(Polynomial poly, String denom) {
         for (Object object: poly.contents) {
             if (object instanceof Term) {

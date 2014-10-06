@@ -41,3 +41,4 @@ public class Logarithm extends Term {
         return true;
     }
 }
+

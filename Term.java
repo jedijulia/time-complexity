@@ -113,10 +113,6 @@ public class Term {
         }
     }
     
-//    - multiply coefficients
-//    - multiply variables
-//            > add their powers! 
-//    - if there are more than one variables: DO NOT MULTIPLY, just concatenate them together 
     
     public Polynomial multiply(Term anotherTerm) {
         String result = "" + (this.getCoefficient() * anotherTerm.getCoefficient());
@@ -236,6 +232,7 @@ public class Term {
         this.denom = denom;
     }
     
+    //update coefficient given a denominator
     public void updateCoefficient() {
         if (this.denom != 1) {
             if ((this.coefficient % this.denom) == 0) {
@@ -246,6 +243,7 @@ public class Term {
         }
     }
     
+    //update coefficient portion of Term's term
     public void updateTermCoeff(String coeff) {
         boolean found = false;
         int i=0;
@@ -265,7 +263,18 @@ public class Term {
     @Override
     public String toString() {
         String toReturn = "";
-        toReturn = this.term;
+        //toReturn = this.term;
+        if (this instanceof Logarithm) {
+            toReturn += this.term;
+        } else {
+            toReturn += this.coefficient;
+            for (Variable var : this.variables) {
+                toReturn += var.variable;
+                if (var.exponent != 1) {
+                    toReturn += var.exponent;
+                }
+            }
+        }
         if (this.denom != 1) {
             toReturn = toReturn + "/" + denom;
         }
@@ -285,4 +294,5 @@ public class Term {
         return true;
     }
 }
+
 

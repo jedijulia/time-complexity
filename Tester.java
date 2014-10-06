@@ -11,15 +11,24 @@ public class Tester {
     public static void main(String[] args) throws IOException {
         FileReader fileReader = new FileReader();
         List<String> lines = fileReader.readlines("input10.in");
-        String toParse = "";
+        List<String> toParse = new ArrayList();
+        String currParse = "";
         for (int i=0; i < lines.size(); i++) {
-            toParse += lines.get(i);
+            if (lines.get(i).trim().equals("")) {
+                toParse.add(currParse);
+                currParse = "";
+            } else {
+                currParse += lines.get(i);
+            }
+        }
+        if (!currParse.equals("")) {
+            toParse.add(currParse);
         }
         
-        BigComponent component = new BigComponent(toParse);
-        //component.print();
-        System.out.println(component.getTOfN());  
-        
+        for (String item: toParse) {
+            BigComponent component = new BigComponent(item);
+            System.out.println(component.getTOfN()); 
+        }
     }
 }
 class FileReader {

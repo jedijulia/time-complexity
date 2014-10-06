@@ -49,7 +49,7 @@ public abstract class Component {
     }
     
     public String getTOfN() {
-        return "this empty thing";
+        return "";
     }
     
     public void print() {
@@ -58,3 +58,4 @@ public abstract class Component {
         }
     }
 }
+

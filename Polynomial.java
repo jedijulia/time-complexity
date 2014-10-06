@@ -46,11 +46,11 @@ public class Polynomial {
         }
     }
         
-    public Polynomial compute() {
+    public Polynomial compute() { //parses polynomial in postfix
         Stack stack = new Stack();
         for (int i=0; i < this.contents.size(); i++) {
             Object currItem = this.contents.get(i);
-            if (currItem instanceof Term) {
+            if (currItem instanceof Term) { 
                 stack.push(currItem);
             } else if (currItem instanceof Polynomial) {
                 stack.push(currItem);
@@ -72,17 +72,13 @@ public class Polynomial {
                 }
                 firstPol = (Polynomial)first;
                 secondPol = (Polynomial)second;
-                System.out.println("firstPol: " + firstPol);
-                System.out.println("secondPol: " + secondPol);
                 
                 if (operation.equals("+")) {   
                     result = firstPol.add(secondPol);
-                    System.out.println("result1: " + result + "\n");
                     result = result.updateCoefficients();
                     stack.push(result);      
                 } else if (operation.equals("*")) {
                     result = firstPol.multiply(secondPol);
-                    System.out.println("result2: " + result + "\n");
                     result = result.updateCoefficients();
                     stack.push(result);
                 }
@@ -184,6 +180,7 @@ public class Polynomial {
         }
     }
     
+    //updates coefficient for each term
     public Polynomial updateCoefficients() {
         List<Object> updated = new ArrayList();
         for (Object object: this.contents) {
@@ -215,3 +212,4 @@ public class Polynomial {
     }
 }
     
+
