@@ -27,7 +27,7 @@ public class Tester {
         
         for (String item: toParse) {
             BigComponent component = new BigComponent(item);
-            System.out.println(component.getTOfN()); 
+            System.out.println("T(n): " + component.getTOfN()); 
         }
     }
 }
