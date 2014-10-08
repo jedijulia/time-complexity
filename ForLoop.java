@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 
 public class ForLoop extends Component {
     List<String> forParts = new ArrayList();
-    String upperBound = "";
-    String lowerBound = "";
+    Polynomial upperBound = new Polynomial("");
+    Polynomial lowerBound = new Polynomial("");
     String var = "";
     
     public ForLoop(String contents) {
@@ -77,59 +77,69 @@ public class ForLoop extends Component {
         counts.add(conditionStatement.getCount());
         counts.add(incdecStatement.getCount());
         
-        // sets bounds only if incdec statement exists
         if (counts.get(2) != 0) {
-            // check condition if less than or greater than 
-            // if less than: initialization is lower, condition is upper
-            // if not: condition is lower, initialization is upper
-            String lower;
-            String upper;
             String comparator = this.getComparator(condition);
-
             String conditionSplit[] = condition.split(comparator);
             String conditionLeft = conditionSplit[0].trim();
             String v = this.findV(conditionLeft);
-            
+            Polynomial upperPoly = new Polynomial("");
+            Polynomial lowerPoly = new Polynomial("");
             if (comparator.contains("<")) {
-                upper = conditionSplit[1].replace(';', ' ').trim() + getVExtra(conditionLeft, v);
-                lower = this.getInitBound(initialization, v);
+                String upper = conditionSplit[1].replace(';', ' ').trim();
+                upperPoly = new Polynomial(upper);
+                upperPoly = this.getVExtra(conditionLeft, v, upperPoly);
+                lowerPoly = new Polynomial(this.getInitBound(initialization, v));
                 if (!comparator.contains("=")) {
-                    upper += "-1";
+                    Term negativeOne = new Term("-1");
+                    upperPoly.add(negativeOne.convertToPolynomial());
                 }
-                if (incdec.contains("-")) {
+                if (incdec.contains("-") || incdec.contains("/")) {
                     System.out.println("THIS IS AN INFINITE LOOP!");
                 } else if (incdec.contains("+")){
                     String incdecResult = this.findIncDec(incdec, "+");
                     if (!incdecResult.equals("+")) {
-                        upper = upper + "/" + incdecResult;
+                        this.setDenoms(upperPoly, incdecResult);
                     }
                 } else if (incdec.contains("*")) {
                     String incdecResult = this.findIncDec(incdec, "*");
-                    upper = "log" + incdecResult + " " + upper;
+                    String upperPolyStr = upperPoly.toString().replace(" ", "");
+                    upper = "log" + incdecResult + " " + upperPolyStr;
+                    String split[] = upper.split("log");
+                    String base = split[1].split(" ")[0];
+                    String arg = split[1].split(" ")[1];
+                    Term log = new Logarithm(base, arg);
+                    upperPoly = log.convertToPolynomial();                
                 } 
             } else {
-                lower = conditionSplit[1].replace(';', ' ').trim();
-                upper = this.getInitBound(initialization, v); 
+                lowerPoly = new Polynomial(conditionSplit[1].replace(';', ' ').trim());
+                upperPoly = new Polynomial(this.getInitBound(initialization, v)); 
                 if (!comparator.contains("=")) {
-                    upper += "-1";
+                    System.out.println("this happened!!!!!");
+                    Term negativeOne = new Term("-1");
+                    upperPoly.add(negativeOne.convertToPolynomial());
+                    System.out.println("upperPoly: " + upperPoly);
                 }
-                if (incdec.contains("+")) {
+                if (incdec.contains("+") || incdec.contains("*")) {
                     System.out.println("THIS IS AN INFINITE LOOP!");
                 } else if (incdec.contains("-")){
                     String incdecResult = this.findIncDec(incdec, "-");
                     if (!incdecResult.equals("-")) {
-                        upper = upper + "/" + incdecResult;
+                        this.setDenoms(upperPoly, incdecResult);
                     }
                 } else if (incdec.contains("/")) {
                     String incdecResult = this.findIncDec(incdec, "/");
-                    upper = "log" + incdecResult + " " + upper;
+                    String upperPolyStr = upperPoly.toString().replace(" ", "");
+                    String upper = "log" + incdecResult + " " + upperPolyStr;
+                    String split[] = upper.split("log");
+                    String base = split[1].split(" ")[0];
+                    String arg = split[1].split(" ")[1];
+                    Term log = new Logarithm(base, arg);
+                    upperPoly = log.convertToPolynomial();  
                 } 
             }
-            this.var = v;
-            this.lowerBound = lower;
-            this.upperBound = upper;
+            this.upperBound = upperPoly;
+            this.lowerBound = lowerPoly.simplify();
         }
-        
         return counts;
     }
     
@@ -178,33 +188,18 @@ public class ForLoop extends Component {
     public Polynomial getSummation(Term constant) {
         // constant: constant * (upper bound - lower bound + 1)
         List<Object> toSum = new ArrayList<Object>();
-        Polynomial upperBoundPoly;
         
-        //upper = "log" + incdecResult + " " + upper;
-        if (this.upperBound.contains("log")) {
-            String split[] = this.upperBound.split("log");
-            String base = split[1].split(" ")[0];
-            String arg = split[1].split(" ")[1];
-            Term log = new Logarithm(base, arg);
-            upperBoundPoly = log.convertToPolynomial();
-        }
-        
-        else if (this.upperBound.contains("/")) {
-            String denom = getDenomSetUpper();
-            upperBoundPoly = new Polynomial(this.upperBound);
-            this.setDenoms(upperBoundPoly, denom);
-        }
-        else {
-            upperBoundPoly = new Polynomial(this.upperBound);
-        }
-        
-        Polynomial lowerBoundPoly = new Polynomial("-" + this.lowerBound);
+        //CHECK THIS
+        Term lowerBoundTerm = this.lowerBound.convertToTerm();
+        String content = lowerBoundTerm.term;
+        content = "-" + content;
+        this.lowerBound = new Polynomial(content);
         Term oneTerm = new Term("1");
         
         //adds objects to toSum in postfix notation
         toSum.add(constant);
-        toSum.add(upperBoundPoly);
-        toSum.add(lowerBoundPoly);
+        toSum.add(this.upperBound);
+        toSum.add(this.lowerBound);
         toSum.add("+");
         toSum.add(oneTerm);
         toSum.add("+");
@@ -226,6 +221,13 @@ public class ForLoop extends Component {
         int conditionCount = counts.get(1);
         int incdecCount = counts.get(2);
         int childrenCount = this.getChildrenCount();
+        
+        System.out.println("initCount: " + initCount);
+        System.out.println("conditionCount: " + conditionCount);
+        System.out.println("incdecCount: " + incdecCount);
+        System.out.println("childrenCount: " + childrenCount);
+        System.out.println("UPPER BOUND: " + this.upperBound);
+        System.out.println("LOWER BOUND: " + this.lowerBound);
         
         if (childrenCount == 0) {
             return "" + (initCount + conditionCount);
@@ -249,10 +251,11 @@ public class ForLoop extends Component {
         return count;
     }
     
-    public String getVExtra(String s, String v) {
+    public Polynomial getVExtra(String s, String v, Polynomial upperPoly) {
+        Polynomial vExtra = new Polynomial("0");
         String[] split = s.split(v);
         if (split.length == 0) {
-            return "";
+            return upperPoly;
         }
         String extra = "";
         for (int i=0; i < split.length; i++) {
@@ -260,19 +263,31 @@ public class ForLoop extends Component {
                 extra += split[i];
             }
         }
+        System.out.println("extra: " + extra);
         
-        String extraRev = "";
+        String operator = "";
+        String number = "";
         for (int j=0; j < extra.length(); j++) {
             char currChar = extra.charAt(j);
-            if (currChar == '+') {
-                extraRev += '-';
-            } else if (currChar == '-') {
-                extraRev += '+';
-            } else {
-                extraRev += currChar;
+            if (currChar != ' ') {
+                if (this.isOperator(currChar)) {
+                    if (!number.equals("")) {
+                        vExtra = new Polynomial(number);
+                        upperPoly = this.performOperation(upperPoly, vExtra, this.reverseOperator(operator));
+                        number = "";
+                    }
+                    operator = "" + currChar;
+                } else {
+                    number += currChar;
+                }
             }
         }
-        return extraRev;
+        if (!number.equals("")) {
+            vExtra = new Polynomial(number);
+            upperPoly = this.performOperation(upperPoly, vExtra, this.reverseOperator(operator));
+        }
+        System.out.println("upperPoly over here: " + upperPoly);
+        return upperPoly;
     }
     
     public String findV(String s) {
@@ -295,14 +310,6 @@ public class ForLoop extends Component {
         return sub;
     }
     
-    // returns the denominator, sets the upperbound 
-    public String getDenomSetUpper() {
-        String[] split = this.upperBound.split("/");
-        String denom = split[1];
-        denom = denom.trim();
-        this.upperBound = split[0].trim();
-        return denom;
-    }
     
     //sets the denominator of each of the terms inside the Polynomial
     public void setDenoms(Polynomial poly, String denom) {
@@ -312,6 +319,45 @@ public class ForLoop extends Component {
                 currTerm.setDenom(Integer.parseInt(denom));
                 currTerm.updateCoefficient();
             }
+        }
+    }
+    
+    public Polynomial performOperation(Polynomial poly, Polynomial anotherPoly, String operator) {
+        Polynomial result = new Polynomial("");
+        Term polyTerm = anotherPoly.convertToTerm();
+        String content = polyTerm.term;
+        if (operator.equals("+")) {
+            result = poly.add(anotherPoly);
+        } else if (operator.equals("-")) {
+            content = "-" + content;
+            anotherPoly = new Polynomial(content);
+            result = poly.add(anotherPoly);
+        } else if (operator.equals("*")) {
+            poly.multiply(anotherPoly);
+        } else { //division
+            this.setDenoms(poly, content);
+            return poly;
+        }
+        return result;
+    }
+    
+    private boolean isOperator(char c) {
+        if (c == '+' || c == '-' || c == '*' || c == '/') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private String reverseOperator(String operator) {
+        if (operator.equals("+")) {
+            return "-";
+        } else if (operator.equals("-")) {
+            return "+";
+        } else if (operator.equals("*")) {
+            return "/";
+        } else { // '/'
+            return "*";
         }
     }
     
