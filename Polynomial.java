@@ -98,20 +98,32 @@ public class Polynomial {
     }
     
     public Polynomial multiply(Polynomial anotherPoly) {
+        List<Object> polyContents = this.contents;
         List<Object> anotherPolyContents = anotherPoly.contents;
-        List<Object> product = new ArrayList();
-        Term toMultiply = (Term)this.contents.get(0);
-        for (int i=0; i < anotherPolyContents.size(); i++) {
-            Object object = anotherPolyContents.get(i);
-            if (object instanceof Term) {
-                Term objectTerm = (Term)object;
-                if (i!=0) {
-                    product.add("+");
+        List<Object> productFinal = new ArrayList();
+        
+        for (Object content: polyContents) {
+            if (content instanceof Term) {
+                Term toMultiply = (Term)content;
+                List<Object> product = new ArrayList();
+                for (int i=0; i < anotherPolyContents.size(); i++) {
+                    Object object = anotherPolyContents.get(i);
+                    if (object instanceof Term) {
+                        Term objectTerm = (Term)object;
+                        if (i!=0) {
+                            product.add("+");
+                        }
+                        product.add(toMultiply.multiply(objectTerm).convertToTerm());
+                    }
                 }
-                product.add(toMultiply.multiply(objectTerm).convertToTerm());
+                for (Object contentProd: product) {
+                    productFinal.add(contentProd);
+                }
+            } else {
+                productFinal.add(content);
             }
         }
-        Polynomial result = new Polynomial(product);
+        Polynomial result = new Polynomial(productFinal);
         result = result.simplify();
         return result;
     }
