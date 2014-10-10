@@ -1,6 +1,5 @@
 package up.cmsc142.julia.TimeComplexityFinal;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -24,9 +23,12 @@ public abstract class Component {
                 stack.push(currChar);
             } else if (currChar == '}') {
                 stack.pop();
+                //System.out.println("stack here: " + stack);
                 if (stack.isEmpty()) {
                     //get contents inside for { } and create ForLoop component
+                    //System.out.println("this happened");
                     String childContents = toParse.substring(beginIndex, i);
+                    //System.out.println("child contents:" + childContents);
                     beginIndex = i+1;
                     Component child = new ForLoop(childContents);
                     this.children.add(child);
@@ -48,8 +50,8 @@ public abstract class Component {
         }
     }
     
-    public String getTOfN() {
-        return "";
+    public Polynomial getTOfN() {
+        return new Polynomial("");
     }
     
     public void print() {

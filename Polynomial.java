@@ -78,6 +78,8 @@ public class Polynomial {
                     result = result.updateCoefficients();
                     stack.push(result);      
                 } else if (operation.equals("*")) {
+                    System.out.println("firstPol: " + firstPol);
+                    System.out.println("secondPol: " + secondPol);
                     result = firstPol.multiply(secondPol);
                     result = result.updateCoefficients();
                     stack.push(result);

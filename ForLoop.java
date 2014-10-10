@@ -32,10 +32,6 @@ public class ForLoop extends Component {
             toParse = matcher.group(2);
         }
         toParse = toParse.trim();
-        if (toParse.endsWith("}")) {
-            toParse = toParse.substring(0, toParse.length()-1);
-        }
-        
         int beginIndex = 0;
         for (int i=0; i < forPart.length(); i++) {
             char currChar = forPart.charAt(i);
@@ -185,7 +181,7 @@ public class ForLoop extends Component {
     }
 
     
-    public Polynomial getSummation(Term constant) {
+    public Polynomial getSummation(Polynomial constant) {
         // constant: constant * (upper bound - lower bound + 1)
         List<Object> toSum = new ArrayList<Object>();
         
@@ -197,6 +193,7 @@ public class ForLoop extends Component {
         Term oneTerm = new Term("1");
         
         //adds objects to toSum in postfix notation
+        System.out.println("this was your constant: " + constant);
         toSum.add(constant);
         toSum.add(this.upperBound);
         toSum.add(this.lowerBound);
@@ -213,7 +210,7 @@ public class ForLoop extends Component {
     
     
     @Override
-    public String getTOfN() {
+    public Polynomial getTOfN() {
         // summation of getChildrenCount + count of condiition + count of incdec
         // t of n = summation + count of init + count of condition
         List<Integer> counts = this.setBoundsGetCounts();
@@ -221,7 +218,7 @@ public class ForLoop extends Component {
         int conditionCount = counts.get(1);
         int incdecCount = counts.get(2);
         int childrenCount = this.getChildrenCount();
-        
+        Polynomial complexity = new Polynomial("");
         System.out.println("initCount: " + initCount);
         System.out.println("conditionCount: " + conditionCount);
         System.out.println("incdecCount: " + incdecCount);
@@ -229,15 +226,23 @@ public class ForLoop extends Component {
         System.out.println("UPPER BOUND: " + this.upperBound);
         System.out.println("LOWER BOUND: " + this.lowerBound);
         
-        if (childrenCount == 0) {
-            return "" + (initCount + conditionCount);
+        if (childrenCount == 0 && this.noForLoopChildren()) {
+            complexity = new Polynomial("" + (initCount + conditionCount));
         } else {
             String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
-            Term constantTerm = new Term(constant);
-            Polynomial summation = this.getSummation(constantTerm);
-            Polynomial complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
-            return complexity.toString();
+            //Term constantTerm = new Term(constant);
+            Polynomial constantPoly = new Polynomial(constant);
+            if (!this.noForLoopChildren()) {
+                for (Component child: this.children) {
+                    constantPoly = constantPoly.add(child.getTOfN());
+                }
+            }
+            System.out.println("constantPoly: " + constantPoly);
+            Polynomial summation = this.getSummation(constantPoly);
+            System.out.println("SUMMATION: " + summation);
+            complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
         }
+        return complexity;
     }
 
     public int getChildrenCount() {
@@ -249,6 +254,15 @@ public class ForLoop extends Component {
             }
         }
         return count;
+    }
+    
+    public boolean noForLoopChildren() {
+        for (Component child: this.children) {
+            if (child instanceof ForLoop) {
+                return false;
+            }
+        }
+        return true;
     }
     
     public Polynomial getVExtra(String s, String v, Polynomial upperPoly) {
