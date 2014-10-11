@@ -218,6 +218,9 @@ public class Term {
                 return false;
             }
         }
+        if (this.denom != anotherTerm.denom) {
+          return false;
+        }
         return true;
     }
     
