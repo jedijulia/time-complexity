@@ -8,7 +8,9 @@ public class BigComponent extends Component {
         this.parse(this.contents);
     }
     
-    public String getTOfN() {
+    @Override
+    public Polynomial getTOfN() {
         return this.children.get(0).getTOfN();
     }
+    
 }

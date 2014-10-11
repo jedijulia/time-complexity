@@ -263,6 +263,10 @@ public class Term {
         this.term = updatedCoeff;
     }
     
+    public boolean isNumeric() {
+      return (this.variables.isEmpty());
+    }
+    
     @Override
     public String toString() {
         String toReturn = "";
