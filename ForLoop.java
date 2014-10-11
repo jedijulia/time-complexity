@@ -85,12 +85,30 @@ public class ForLoop extends Component {
                 upperPoly = new Polynomial(upper);
                 upperPoly = this.getVExtra(conditionLeft, v, upperPoly);
                 lowerPoly = new Polynomial(this.getInitBound(initialization, v));
-                if (!comparator.contains("=")) {
-                    Term negativeOne = new Term("-1");
-                    upperPoly.add(negativeOne.convertToPolynomial());
+                
+                //Check for whether loop will be executed
+                if (upperPoly.contents.size()==1 && lowerPoly.contents.size()==1) {
+                  if (upperPoly.convertToTerm().isNumeric() && lowerPoly.convertToTerm().isNumeric()) {
+                    if (!comparator.contains("=")) {
+                        if (Integer.parseInt(upperPoly.convertToTerm().term) < Integer.parseInt(lowerPoly.convertToTerm().term)) {
+                          //Loop cannot be executed. Only initialization and condition will be counted
+                          counts.add(-2);
+                          return counts;
+                        }
+                    } else {
+                        if (Integer.parseInt(upperPoly.convertToTerm().term) <= Integer.parseInt(lowerPoly.convertToTerm().term)) {
+                          //Loop cannot be executed. Only initialization and condition will be counted
+                          counts.add(-2);
+                          return counts;
+                        }
+                    }
+                  }
                 }
+                
                 if (incdec.contains("-") || incdec.contains("/")) {
-                    System.out.println("THIS IS AN INFINITE LOOP!");
+                    //INFINITE LOOP
+                    counts.add(-1);
+                    return counts;
                 } else if (incdec.contains("+")){
                     String incdecResult = this.findIncDec(incdec, "+");
                     if (!incdecResult.equals("+")) {
@@ -106,17 +124,37 @@ public class ForLoop extends Component {
                     Term log = new Logarithm(base, arg);
                     upperPoly = log.convertToPolynomial();                
                 } 
-            } else {
-                lowerPoly = new Polynomial(conditionSplit[1].replace(';', ' ').trim());
-                upperPoly = new Polynomial(this.getInitBound(initialization, v)); 
                 if (!comparator.contains("=")) {
-                    System.out.println("this happened!!!!!");
                     Term negativeOne = new Term("-1");
                     upperPoly.add(negativeOne.convertToPolynomial());
-                    System.out.println("upperPoly: " + upperPoly);
                 }
+            } else { // comparator contains ">"
+                lowerPoly = new Polynomial(conditionSplit[1].replace(';', ' ').trim());
+                upperPoly = new Polynomial(this.getInitBound(initialization, v)); 
+                
+                //Check for whether loop will be executed
+                if (upperPoly.contents.size()==1 && lowerPoly.contents.size()==1) {
+                  if (upperPoly.convertToTerm().isNumeric() && lowerPoly.convertToTerm().isNumeric()) {
+                    if (!comparator.contains("=")) {
+                      if (Integer.parseInt(upperPoly.convertToTerm().term) < Integer.parseInt(lowerPoly.convertToTerm().term)) {
+                        //Loop cannot be executed. Only initialization and condition will be counted
+                        counts.add(-2);
+                        return counts;
+                      }
+                    } else {
+                      if (Integer.parseInt(upperPoly.convertToTerm().term) <= Integer.parseInt(lowerPoly.convertToTerm().term)) {
+                        //Loop cannot be executed. Only initialization and condition will be counted
+                        counts.add(-2);
+                        return counts;
+                      }
+                    }
+                  }
+                }
+                
                 if (incdec.contains("+") || incdec.contains("*")) {
-                    System.out.println("THIS IS AN INFINITE LOOP!");
+                    //INFINITE LOOP
+                    counts.add(-1);
+                    return counts;
                 } else if (incdec.contains("-")){
                     String incdecResult = this.findIncDec(incdec, "-");
                     if (!incdecResult.equals("-")) {
@@ -132,6 +170,10 @@ public class ForLoop extends Component {
                     Term log = new Logarithm(base, arg);
                     upperPoly = log.convertToPolynomial();  
                 } 
+                if (!comparator.contains("=")) {
+                    Term negativeOne = new Term("-1");
+                    upperPoly.add(negativeOne.convertToPolynomial());
+                }
             }
             this.upperBound = upperPoly;
             this.lowerBound = lowerPoly.simplify();
@@ -214,10 +256,22 @@ public class ForLoop extends Component {
         // summation of getChildrenCount + count of condiition + count of incdec
         // t of n = summation + count of init + count of condition
         List<Integer> counts = this.setBoundsGetCounts();
+        
+        //infinite loop check
+        if (counts.contains(-1)) {
+          return new Polynomial("InfiniteLoop");
+        }
+        
         int initCount = counts.get(0);
         int conditionCount = counts.get(1);
         int incdecCount = counts.get(2);
         int childrenCount = this.getChildrenCount();
+        
+        //check if loop will be executed
+        if (counts.contains(-2)) {
+          return new Polynomial("" + (initCount + conditionCount));
+        }
+        
         Polynomial complexity = new Polynomial("");
         System.out.println("initCount: " + initCount);
         System.out.println("conditionCount: " + conditionCount);
@@ -234,6 +288,11 @@ public class ForLoop extends Component {
             Polynomial constantPoly = new Polynomial(constant);
             if (!this.noForLoopChildren()) {
                 for (Component child: this.children) {
+                    Polynomial childTOfN = child.getTOfN();
+                    //infinite loop check
+                    if ((!childTOfN.contents.isEmpty()) && (childTOfN.convertToTerm().term.equals("InfiniteLoop"))) {
+                      return new Polynomial("InfiniteLoop");
+                    }
                     constantPoly = constantPoly.add(child.getTOfN());
                 }
             }
@@ -300,7 +359,6 @@ public class ForLoop extends Component {
             vExtra = new Polynomial(number);
             upperPoly = this.performOperation(upperPoly, vExtra, this.reverseOperator(operator));
         }
-        System.out.println("upperPoly over here: " + upperPoly);
         return upperPoly;
     }
     

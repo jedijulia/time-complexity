@@ -24,10 +24,14 @@ public class Tester {
         if (!currParse.equals("")) {
             toParse.add(currParse);
         }
-        
         for (String item: toParse) {
             BigComponent component = new BigComponent(item);
-            System.out.println("T(n): " + component.getTOfN()); 
+            Polynomial TOfN = component.getTOfN();
+            if (TOfN.convertToTerm().term.equals("InfiniteLoop")) {
+              System.out.println("-------------------------------------------- T(n): INFINITE LOOP" );
+            } else {
+              System.out.println("-------------------------------------------- T(n): " + TOfN);
+            }
         }
     }
 }

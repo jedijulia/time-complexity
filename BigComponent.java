@@ -12,5 +12,4 @@ public class BigComponent extends Component {
     public Polynomial getTOfN() {
         return this.children.get(0).getTOfN();
     }
-    
 }
