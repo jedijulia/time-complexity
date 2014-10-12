@@ -170,7 +170,25 @@ public class Polynomial {
         }
         
         Polynomial arrangedPoly = new Polynomial(arranged);
-        return arrangedPoly;
+        return arrangedPoly.removeExcess();
+    }
+    
+    public Polynomial removeExcess() {
+        int opCount = 0;
+        List<Object> removed = new ArrayList<Object>();
+        for (Object object: this.contents) {
+            if (object instanceof Term) {
+                removed.add(object);
+                opCount = 0;
+            } else {
+                if (opCount == 0) {
+                    removed.add(object);
+                    opCount ++;
+                } 
+            }
+        }
+        Polynomial removedPoly = new Polynomial(removed);
+        return removedPoly;
     }
     
     public boolean isTerm() {
@@ -198,7 +216,7 @@ public class Polynomial {
     public Polynomial updateCoefficients() {
         List<Object> updated = new ArrayList();
         for (Object object: this.contents) {
-            if (object instanceof Term) {
+            if (object instanceof Term && !(object instanceof Logarithm)) {
                 Term currTerm = (Term)object;
                 currTerm.updateCoefficient();
                 updated.add(currTerm);
@@ -225,7 +243,7 @@ public Polynomial toNegative() {
       }
       Polynomial negative = new Polynomial(contentsNeg);
       return negative;
-  }      
+  }
     
     @Override
     public String toString() {
