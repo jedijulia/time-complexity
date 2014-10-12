@@ -210,6 +210,23 @@ public class Polynomial {
         return updatedPoly;
     }
     
+public Polynomial toNegative() {
+      List<Object> contentsNeg = new ArrayList<Object>();
+      for (Object object: this.contents) {
+          if (object instanceof Term) {
+            Term term = (Term)object;
+            String content = term.term;
+            content = "-" + content;
+            Term termNeg = new Term(content);
+            contentsNeg.add(termNeg);
+          } else {
+            contentsNeg.add(object);
+          }
+      }
+      Polynomial negative = new Polynomial(contentsNeg);
+      return negative;
+  }      
+    
     @Override
     public String toString() {
         String toReturn = "";

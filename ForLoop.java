@@ -173,6 +173,7 @@ public class ForLoop extends Component {
                 if (!comparator.contains("=")) {
                     Term negativeOne = new Term("-1");
                     upperPoly.add(negativeOne.convertToPolynomial());
+                    System.out.println("upperPoly: " + upperPoly);
                 }
             }
             this.upperBound = upperPoly;
@@ -228,10 +229,11 @@ public class ForLoop extends Component {
         List<Object> toSum = new ArrayList<Object>();
         
         //CHECK THIS
-        Term lowerBoundTerm = this.lowerBound.convertToTerm();
-        String content = lowerBoundTerm.term;
-        content = "-" + content;
-        this.lowerBound = new Polynomial(content);
+        this.lowerBound = this.lowerBound.toNegative();
+//        Term lowerBoundTerm = this.lowerBound.convertToTerm();
+//        String content = lowerBoundTerm.term;
+//        content = "-" + content;
+//        this.lowerBound = new Polynomial(content);
         Term oneTerm = new Term("1");
         
         //adds objects to toSum in postfix notation
@@ -281,10 +283,16 @@ public class ForLoop extends Component {
         System.out.println("LOWER BOUND: " + this.lowerBound);
         
         if (childrenCount == 0 && this.noForLoopChildren()) {
-            complexity = new Polynomial("" + (initCount + conditionCount));
+            if (!this.upperBound.contents.isEmpty() && !this.lowerBound.contents.isEmpty()) {
+                String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
+                Polynomial constantPoly = new Polynomial(constant);
+                Polynomial summation = this.getSummation(constantPoly);
+                complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
+            } else {
+                complexity = new Polynomial("" + (initCount + conditionCount));
+            }
         } else {
             String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
-            //Term constantTerm = new Term(constant);
             Polynomial constantPoly = new Polynomial(constant);
             if (!this.noForLoopChildren()) {
                 for (Component child: this.children) {
@@ -359,6 +367,7 @@ public class ForLoop extends Component {
             vExtra = new Polynomial(number);
             upperPoly = this.performOperation(upperPoly, vExtra, this.reverseOperator(operator));
         }
+        System.out.println("upperPoly over here: " + upperPoly);
         return upperPoly;
     }
     
