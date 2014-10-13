@@ -274,7 +274,9 @@ public class Term {
         if (this instanceof Logarithm) {
             toReturn += this.term;
         } else {
-            toReturn += this.coefficient;
+            if (!(this.coefficient == 1 && !this.variables.isEmpty())) {
+                toReturn += this.coefficient;
+            }
             for (Variable var : this.variables) {
                 toReturn += var.variable;
                 if (var.exponent != 1) {
