@@ -45,8 +45,9 @@ public class Polynomial {
             this.contents.add(term);
         }
     }
-        
-    public Polynomial compute() { //parses polynomial in postfix
+    
+    //parses polynomial in postfix
+    public Polynomial compute() { 
         Stack stack = new Stack();
         for (int i=0; i < this.contents.size(); i++) {
             Object currItem = this.contents.get(i);
@@ -78,8 +79,6 @@ public class Polynomial {
                     result = result.updateCoefficients();
                     stack.push(result);      
                 } else if (operation.equals("*")) {
-                    System.out.println("firstPol: " + firstPol);
-                    System.out.println("secondPol: " + secondPol);
                     result = firstPol.multiply(secondPol);
                     result = result.updateCoefficients();
                     stack.push(result);
@@ -173,6 +172,7 @@ public class Polynomial {
         return arrangedPoly.removeExcess();
     }
     
+    //removes excess operators
     public Polynomial removeExcess() {
         int opCount = 0;
         List<Object> removed = new ArrayList<Object>();
@@ -228,22 +228,62 @@ public class Polynomial {
         return updatedPoly;
     }
     
-public Polynomial toNegative() {
-      List<Object> contentsNeg = new ArrayList<Object>();
-      for (Object object: this.contents) {
-          if (object instanceof Term) {
-            Term term = (Term)object;
-            String content = term.term;
-            content = "-" + content;
-            Term termNeg = new Term(content);
-            contentsNeg.add(termNeg);
-          } else {
-            contentsNeg.add(object);
+    //returns true if a term in the polynomial contains the variable
+    public boolean hasVar(String var) {
+          for (Object object: this.contents) {
+              if (object instanceof Term) {
+                Term term = (Term)object;
+                if (term.hasVar(var)) { 
+                    return true;
+                }
+              } 
           }
+          return false;
+    }
+    
+    //converts every term in the polynomial to its negative counterpart
+    public Polynomial toNegative() {
+          List<Object> contentsNeg = new ArrayList<Object>();
+          for (Object object: this.contents) {
+              if (object instanceof Term) {
+                Term term = (Term)object;
+                String content = term.term;
+                content = "-" + content;
+                Term termNeg = new Term(content);
+                contentsNeg.add(termNeg);
+              } else {
+                contentsNeg.add(object);
+              }
+          }
+          Polynomial negative = new Polynomial(contentsNeg);
+          return negative;
       }
-      Polynomial negative = new Polynomial(contentsNeg);
-      return negative;
-  }
+    
+    //removes terms with 0 as their coefficient
+    public Polynomial clean() {
+        ArrayList<Object> cleaned = new ArrayList();
+        for (Object object: this.contents) {
+            if (object instanceof Term) {
+                Term term = (Term)object;
+                if (term.coefficient != 0) {
+                    if (! cleaned.isEmpty()) {
+                        cleaned.add("+");
+                    }
+                    cleaned.add(object);
+                }
+            }
+        }
+        return new Polynomial(cleaned);
+    }
+    
+    //clones the contents of a polynomial
+    public Polynomial clone(Polynomial anotherPoly) {
+        ArrayList<Object> cloneContents = new ArrayList();
+        for (Object object: anotherPoly.contents) {
+            cloneContents.add(object);
+        }
+        return new Polynomial(cloneContents);
+    }
     
     @Override
     public String toString() {
