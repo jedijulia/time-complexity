@@ -224,20 +224,13 @@ public class ForLoop extends Component {
     }
 
     
+    // returns the summation of constant terms
     public Polynomial getSummation(Polynomial constant) {
         // constant: constant * (upper bound - lower bound + 1)
         List<Object> toSum = new ArrayList<Object>();
-        
-        //CHECK THIS
         this.lowerBound = this.lowerBound.toNegative();
-//        Term lowerBoundTerm = this.lowerBound.convertToTerm();
-//        String content = lowerBoundTerm.term;
-//        content = "-" + content;
-//        this.lowerBound = new Polynomial(content);
         Term oneTerm = new Term("1");
-        
         //adds objects to toSum in postfix notation
-        System.out.println("this was your constant: " + constant);
         toSum.add(constant);
         toSum.add(this.upperBound);
         toSum.add(this.lowerBound);
@@ -247,10 +240,57 @@ public class ForLoop extends Component {
         toSum.add("*");
         
         Polynomial summation = new Polynomial(toSum);
-        
         summation = summation.compute();
         return summation;
     } 
+    
+    // returns the summation of terms containing non-constants to be summed
+    public Polynomial getSummationSpec(Polynomial constant, Polynomial upperPoly, Polynomial lowerPoly) {
+        Polynomial finalResult = new Polynomial("");
+        for(Object object: constant.contents) {
+            if (object instanceof Term) {
+                Term term = (Term)object;
+                String notVarStr = "" + term.coefficient;
+                // retrieves the portion of the term that is not the non-constant variable 
+                for (Variable variable: term.variables) {
+                    if (!variable.variable.equals(this.var)) {
+                        notVarStr += variable.variable;
+                        if (variable.exponent != 0) {
+                            notVarStr += variable.exponent;
+                        }
+                    }
+                }
+                Term notVarTerm = new Term(notVarStr);
+                // multiplies the notVarTerm with the summation of the non-constant variable
+                if (finalResult.contents.isEmpty()) {
+                    finalResult = notVarTerm.convertToPolynomial().multiply(this.getSummationSpecial(upperPoly, lowerPoly));
+                } else {
+                    finalResult = finalResult.add(notVarTerm.convertToPolynomial().multiply(this.getSummationSpecial(upperPoly, lowerPoly)));
+                }
+            }
+        }
+        return finalResult;
+    }
+    
+    //returns the summation of a non-constant
+    public Polynomial getSummationSpecial(Polynomial upperPol, Polynomial lowerPol) {
+        Polynomial result = new Polynomial("");
+        
+        if (lowerPol.convertToTerm().term.equals("0")) {
+            upperPol = upperPol.add(new Polynomial("1"));
+            result = upperPol.multiply(upperPol);
+            result = result.add(upperPol);
+            this.setDenoms(result, "2");
+        } else {
+            result = upperPol.multiply(upperPol);
+            result = result.add(upperPol);
+            Polynomial lowerSquared = lowerPol.multiply(lowerPol).toNegative();
+            result = result.add(lowerSquared);
+            result = result.add(lowerPol);
+            this.setDenoms(result, "2");
+        }
+        return result;
+    }
     
     
     @Override
