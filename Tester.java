@@ -28,9 +28,9 @@ public class Tester {
             BigComponent component = new BigComponent(item);
             Polynomial TOfN = component.getTOfN();
             if (TOfN.convertToTerm().term.equals("InfiniteLoop")) {
-              System.out.println("-------------------------------------------- T(n): INFINITE LOOP" );
+              System.out.println("T(n): INFINITE LOOP" );
             } else {
-              System.out.println("-------------------------------------------- T(n): " + TOfN);
+              System.out.println("T(n): " + TOfN);
             }
         }
     }
