@@ -313,22 +313,21 @@ public class ForLoop extends Component {
         if (counts.contains(-2)) {
           return new Polynomial("" + (initCount + conditionCount));
         }
-        
         Polynomial complexity = new Polynomial("");
-        System.out.println("initCount: " + initCount);
-        System.out.println("conditionCount: " + conditionCount);
-        System.out.println("incdecCount: " + incdecCount);
-        System.out.println("childrenCount: " + childrenCount);
-        System.out.println("UPPER BOUND: " + this.upperBound);
-        System.out.println("LOWER BOUND: " + this.lowerBound);
         
+        if (initCount == 0 || conditionCount == 0 || incdecCount == 0){
+            return new Polynomial("InfiniteLoop");
+        }
+        
+        //checks if loop has a 0 childrenCount (count of statements) and no inner for loops
         if (childrenCount == 0 && this.noForLoopChildren()) {
+            //checks if loop runs but has no body
             if (!this.upperBound.contents.isEmpty() && !this.lowerBound.contents.isEmpty()) {
                 String constant = "" + (this.getChildrenCount() + conditionCount + incdecCount);
                 Polynomial constantPoly = new Polynomial(constant);
                 Polynomial summation = this.getSummation(constantPoly);
                 complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
-            } else {
+            } else { //just add counts of initialization and condition statements
                 complexity = new Polynomial("" + (initCount + conditionCount));
             }
         } else {
@@ -341,13 +340,55 @@ public class ForLoop extends Component {
                     if ((!childTOfN.contents.isEmpty()) && (childTOfN.convertToTerm().term.equals("InfiniteLoop"))) {
                       return new Polynomial("InfiniteLoop");
                     }
-                    constantPoly = constantPoly.add(child.getTOfN());
+                    constantPoly = constantPoly.add(childTOfN);
                 }
             }
-            System.out.println("constantPoly: " + constantPoly);
-            Polynomial summation = this.getSummation(constantPoly);
-            System.out.println("SUMMATION: " + summation);
+            Polynomial summation = new Polynomial("");
+            
+            //checks if constantPoly (polynomial to be summed) has a non-constant
+            //aka the variable concerned / the iterator 
+            if (constantPoly.hasVar(var)) {
+                List<Object> regSum = new ArrayList();
+                List<Object> specSum = new ArrayList();
+                //the terms containing the non-constant are added to specSum
+                //those that do not are added to regSum
+                for (int i=0; i < constantPoly.contents.size(); i++) {
+                    Object object = constantPoly.contents.get(i);
+                    if (object instanceof Term) {
+                        Term term = (Term)object;
+                        if (term.hasVar(var)) {
+                            if (!specSum.isEmpty()) {
+                                specSum.add("+");
+                            }
+                            specSum.add(object);
+                        } else {
+                            if (!regSum.isEmpty()) {
+                                regSum.add("+");
+                            }
+                            regSum.add(object);
+                        }
+                    } 
+               }
+                //summations of regPoly and specPoly are added and stored as the summation
+                Polynomial regPoly = new Polynomial(regSum);
+                Polynomial specPoly = new Polynomial(specSum);
+                Polynomial upperPoly = new Polynomial("");
+                Polynomial lowerPoly = new Polynomial("");
+                upperPoly = upperPoly.clone(this.upperBound);
+                lowerPoly = lowerPoly.clone(this.lowerBound);
+                Polynomial regPolySum = this.getSummation(regPoly);
+                Polynomial specPolySum = this.getSummationSpec(specPoly, upperPoly, lowerPoly);
+                summation = regPolySum.add(specPolySum);
+            }
+            else {
+                summation = this.getSummation(constantPoly);
+            }
+            //complexity is computed
             complexity = summation.add(new Term("" + (initCount + conditionCount)).convertToPolynomial());
+            complexity = complexity.clean(); //remove terms with 0 as coefficient
+            complexity = complexity.updateCoefficients(); //update coefficients accdng to denominators 
+            complexity = complexity.simplify(); 
+            complexity = complexity.clean();
         }
         return complexity;
     }
