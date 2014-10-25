@@ -78,6 +78,7 @@ public class ForLoop extends Component {
             String conditionSplit[] = condition.split(comparator);
             String conditionLeft = conditionSplit[0].trim();
             String v = this.findV(conditionLeft);
+            this.var = v.trim();
             Polynomial upperPoly = new Polynomial("");
             Polynomial lowerPoly = new Polynomial("");
             if (comparator.contains("<")) {
@@ -173,7 +174,6 @@ public class ForLoop extends Component {
                 if (!comparator.contains("=")) {
                     Term negativeOne = new Term("-1");
                     upperPoly.add(negativeOne.convertToPolynomial());
-                    System.out.println("upperPoly: " + upperPoly);
                 }
             }
             this.upperBound = upperPoly;
@@ -223,7 +223,6 @@ public class ForLoop extends Component {
         return initBound.trim();
     }
 
-    
     // returns the summation of constant terms
     public Polynomial getSummation(Polynomial constant) {
         // constant: constant * (upper bound - lower bound + 1)
@@ -392,7 +391,8 @@ public class ForLoop extends Component {
         }
         return complexity;
     }
-
+    
+    //returns the count of the loop's children that are statements
     public int getChildrenCount() {
         int count = 0;
         for (Component child: this.children) {
@@ -404,6 +404,7 @@ public class ForLoop extends Component {
         return count;
     }
     
+    //returns true if the loop has no children that are for loops
     public boolean noForLoopChildren() {
         for (Component child: this.children) {
             if (child instanceof ForLoop) {
@@ -413,6 +414,7 @@ public class ForLoop extends Component {
         return true;
     }
     
+    //retrieves the statement surrounding the variable (iterator) involved
     public Polynomial getVExtra(String s, String v, Polynomial upperPoly) {
         Polynomial vExtra = new Polynomial("0");
         String[] split = s.split(v);
@@ -425,8 +427,6 @@ public class ForLoop extends Component {
                 extra += split[i];
             }
         }
-        System.out.println("extra: " + extra);
-        
         String operator = "";
         String number = "";
         for (int j=0; j < extra.length(); j++) {
@@ -448,10 +448,10 @@ public class ForLoop extends Component {
             vExtra = new Polynomial(number);
             upperPoly = this.performOperation(upperPoly, vExtra, this.reverseOperator(operator));
         }
-        System.out.println("upperPoly over here: " + upperPoly);
         return upperPoly;
     }
     
+    //returns the variable involved / variable in condition / variable that is the iterator
     public String findV(String s) {
         for (int i=0; i < s.length(); i++) {
             char currChar = s.charAt(i);
@@ -479,11 +479,14 @@ public class ForLoop extends Component {
             if (object instanceof Term) {
                 Term currTerm = (Term)object;
                 currTerm.setDenom(Integer.parseInt(denom));
-                currTerm.updateCoefficient();
+                if (currTerm.coefficient != 0) {
+                    currTerm.updateCoefficient();
+                }
             }
         }
     }
     
+    //performs a given operation on two polynomials and returns the result
     public Polynomial performOperation(Polynomial poly, Polynomial anotherPoly, String operator) {
         Polynomial result = new Polynomial("");
         Term polyTerm = anotherPoly.convertToTerm();
