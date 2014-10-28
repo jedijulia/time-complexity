@@ -200,6 +200,23 @@ public class Term {
         return this.variables;
     }
     
+    public int findVar(String var) {
+        for (int i=0; i < this.variables.size(); i++) {
+            Variable currVar = this.variables.get(i);
+            if (currVar.variable.equals(var)) {
+                return i;
+            }
+        }
+        return -1;
+    } 
+    
+    public boolean hasVar(String var) {
+        if (this.findVar(var) != -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     
     public boolean isValid(Term anotherTerm) {
         if (this instanceof Logarithm || anotherTerm instanceof Logarithm) {
