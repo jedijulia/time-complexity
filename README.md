@@ -1,4 +1,4 @@
 time-complexity
 ===============
 
-returns the time complexity of for loops 
+computes for the time complexity of for loops 
